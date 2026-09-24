@@ -126,7 +126,7 @@ public partial class TaskbarWidget : Window
                 TextAlignment = TextAlignment.Right,
                 Margin = new Thickness(sp.Children.Count > 1 ? 6 : 0, 0, 0, 0),
             };
-            Typography.SetNumeralAlignment(tb, FontNumeralAlignment.Tabular);
+            System.Windows.Documents.Typography.SetNumeralAlignment(tb, FontNumeralAlignment.Tabular);
             _values[key] = tb;
             sp.Children.Add(tb);
         }

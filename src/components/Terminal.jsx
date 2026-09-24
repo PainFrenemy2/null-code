@@ -3,14 +3,14 @@ import { motion, useInView } from 'framer-motion'
 import Reveal from './Reveal.jsx'
 
 const script = [
-  { t: 'cmd', v: 'npx create-null-code your-idea' },
-  { t: 'out', v: '✔ анализ задачи ............ done' },
-  { t: 'out', v: '✔ подбор стека ............. react · node · postgres' },
-  { t: 'out', v: '✔ дизайн ................... figma → ui' },
-  { t: 'out', v: '✔ разработка ............... 100%' },
-  { t: 'out', v: '✔ тесты .................... passed' },
-  { t: 'cmd', v: 'nc deploy --prod' },
-  { t: 'ok', v: '🚀 your-idea is live → https://your-idea.app' },
+  { t: 'cmd', v: 'git commit -m "monitoring: first release"' },
+  { t: 'out', v: '✔ сборка windows-x64 ........ done' },
+  { t: 'out', v: '✔ сборка linux-x64 .......... done' },
+  { t: 'out', v: '✔ сборка macos-arm64 ........ done' },
+  { t: 'out', v: '✔ тесты ..................... passed' },
+  { t: 'cmd', v: 'gh release create v1.0.0 ./dist/*' },
+  { t: 'out', v: '✔ 3 файла загружено в релиз' },
+  { t: 'ok', v: '↓ доступно для скачивания → null/code / проекты' },
 ]
 
 export default function Terminal() {
@@ -48,10 +48,10 @@ export default function Terminal() {
   return (
     <section className="section terminal-section">
       <div className="section__head">
-        <div className="label mono">[ 03 ] как это выглядит</div>
+        <div className="label mono">[ 04 ] от коммита до загрузки</div>
         <Reveal as="h2" className="h2">
-          Одна команда —<br />
-          <span className="outline-text">и идея живая</span>
+          Один релиз —<br />
+          <span className="outline-text">и все качают</span>
         </Reveal>
       </div>
       <Reveal>

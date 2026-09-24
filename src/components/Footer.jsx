@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import Logo from './Logo.jsx'
-import { VK_URL } from './Contact.jsx'
-import { scrollTo } from './Nav.jsx'
+import { GITHUB_URL, VK_URL } from '../config.js'
+import { goRoute, smoothTo } from '../router.js'
 
 export default function Footer() {
   return (
@@ -11,12 +11,14 @@ export default function Footer() {
           <Logo size={48} />
           <div className="mono">
             null<span className="dim">/</span>code
-            <div className="dim">official</div>
+            <div className="dim">community</div>
           </div>
         </div>
         <div className="footer__links mono">
+          <a href="#/projects" onClick={goRoute('#/projects')}>Проекты</a>
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub ↗</a>
           <a href={VK_URL} target="_blank" rel="noreferrer">VK ↗</a>
-          <a href="#top" onClick={scrollTo('#top')}>Наверх ↑</a>
+          <a href="#top" onClick={(e) => { e.preventDefault(); smoothTo(0) }}>Наверх ↑</a>
         </div>
       </div>
       <motion.div
@@ -29,7 +31,7 @@ export default function Footer() {
         NULL<span>/</span>CODE
       </motion.div>
       <div className="footer__bottom mono dim">
-        <span>© {new Date().getFullYear()} null/code</span>
+        <span>© {new Date().getFullYear()} null/code community</span>
         <span>from zero to code</span>
       </div>
     </footer>

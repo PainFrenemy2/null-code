@@ -4,9 +4,9 @@
 
 <br />
 
-**Сайт студии разработки null/code: из нуля — в работающий продукт.**
+**null/code — сообщество, которое делает штуки и выкладывает их в открытый доступ.**
 
-Сайты · приложения · боты · игры · бэкенд · дизайн
+программы · мониторинг · моды · боты · игры · веб
 
 <br />
 
@@ -21,6 +21,47 @@
 
 <img src="docs/screenshots/hero.png" alt="Главный экран" width="100%" />
 
+## ✦ Вкладка «Проекты»
+
+Сайт сам собирает список проектов с GitHub, базы данных нет. **Каждая ветка этого репозитория — отдельный проект.**
+
+<img src="docs/screenshots/projects.png" alt="Вкладка проекты" width="100%" />
+
+- **Описание** берётся из `README.md` ветки: заголовок `# ...` и первый абзац.
+- **Исходники**: кнопка скачивает `.zip` ветки.
+- **Сборки** берутся из [GitHub Releases](../../releases). Сайт определяет систему посетителя (Windows / macOS / Linux / Android) и подсвечивает нужный файл. Остальные файлы лежат под «другие файлы».
+- **Не показываются** ветки `main` / `master` (сам сайт), `gh-pages` и `claude/*`. Список настраивается в `src/config.js`.
+- Отдельные репозитории тоже можно показать: `EXTRA_REPOS` в `src/config.js`.
+
+> ⚠️ **Репозиторий должен быть публичным.** Иначе посетители не увидят ветки и не смогут скачать файлы: GitHub отдаёт приватные данные только авторизованным пользователям.
+
+### Как добавить проект
+
+```bash
+# 1. Новая пустая ветка под проект
+git checkout --orphan monitoring
+git rm -rf .
+# ...кладём код проекта и README.md с заголовком и описанием...
+git add . && git commit -m "monitoring: init"
+git push -u origin monitoring
+```
+
+Всё, проект появится на сайте с кнопкой «Исходный код».
+
+### Как выложить готовую сборку
+
+Создайте релиз и прикрепите скомпилированные файлы. Тег начинается с имени ветки:
+
+```bash
+gh release create monitoring-v1.0.0 \
+  --target monitoring --title "Monitoring 1.0.0" \
+  build/monitoring-windows-x64.exe build/monitoring-linux-x64.AppImage build/monitoring-macos.dmg
+```
+
+Можно и через сайт GitHub: **Releases → Draft a new release**. В поле *Target* выберите ветку проекта, тег назовите `monitoring-v1.0.0` и перетащите файлы.
+
+Чтобы сайт угадал систему, в имени файла должно быть `windows`/`win`/`.exe`, `mac`/`darwin`/`.dmg`, `linux`/`.AppImage`/`.deb` или `.apk`.
+
 ## ✦ Что внутри
 
 | | |
@@ -32,19 +73,20 @@
 | **Услуги** | Карточки с 3D-наклоном и световым пятном под курсором |
 | **Процесс** | Горизонтальная лента этапов внутри вертикального скролла |
 | **Терминал** | Сам печатает команды, когда попадает в экран |
-| **Стек и контакты** | Пружинящие чипы технологий, выбор типа проекта и кнопка в VK |
+| **Проекты** | Превью на главной и отдельная вкладка `#/projects`: поиск, фильтры, загрузки под вашу ОС |
+| **Стек и сообщество** | Пружинящие чипы технологий, как помочь проекту, ссылки на VK и GitHub |
 | **Мелочи** | Свой курсор, магнитные кнопки, зерно, прогресс-бар, плавный скролл (Lenis), `prefers-reduced-motion`, адаптив |
 
 ## ✦ Скриншоты
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/services.png" alt="Услуги" /></td>
-    <td width="50%"><img src="docs/screenshots/process.png" alt="Процесс" /></td>
+    <td width="50%"><img src="docs/screenshots/services.png" alt="Направления" /></td>
+    <td width="50%"><img src="docs/screenshots/teaser.png" alt="Проекты на главной" /></td>
   </tr>
   <tr>
+    <td width="50%"><img src="docs/screenshots/process.png" alt="Как мы работаем" /></td>
     <td width="50%"><img src="docs/screenshots/terminal.png" alt="Терминал" /></td>
-    <td width="50%"><img src="docs/screenshots/contact.png" alt="Контакты" /></td>
   </tr>
 </table>
 
@@ -65,7 +107,7 @@ npm run preview   # посмотреть сборку локально
 
 ## ✦ Деплой
 
-**GitHub Pages.** В репозитории уже есть workflow `.github/workflows/deploy.yml`: он собирает сайт при каждом пуше в `main`. Один раз включите в **Settings → Pages → Source: GitHub Actions**.
+**GitHub Pages.** В репозитории уже есть workflow `.github/workflows/deploy.yml`: он собирает сайт при каждом пуше в `main`. Один раз включите в **Settings → Pages → Source: GitHub Actions**. Сайт живёт в `main`, проекты — в остальных ветках.
 
 **Любой другой хостинг** (Vercel, Netlify, свой сервер): соберите `npm run build` и отдайте папку `dist/`.
 
@@ -73,7 +115,10 @@ npm run preview   # посмотреть сборку локально
 
 ```
 src/
-├── App.jsx               # сборка страницы + плавный скролл
+├── config.js             # ← ссылки, репозиторий, какие ветки скрыть
+├── github.js             # загрузка веток, релизов и README с GitHub API
+├── router.js             # хэш-роутинг (#/ и #/projects)
+├── App.jsx               # страницы, переходы, плавный скролл
 ├── styles.css            # вся стилизация, токены в :root
 └── components/
     ├── Preloader.jsx     # экран загрузки
@@ -82,11 +127,14 @@ src/
     ├── CodeField.jsx     # canvas-фон из символов
     ├── Marquee.jsx       # бегущая строка
     ├── Manifest.jsx      # текст с проявлением по скроллу
-    ├── Services.jsx      # карточки услуг
+    ├── Services.jsx      # направления
+    ├── ProjectsTeaser.jsx# последние проекты на главной
+    ├── Projects.jsx      # вкладка «Проекты»
+    ├── ProjectCard.jsx   # карточка проекта с загрузками
     ├── Process.jsx       # горизонтальный скролл этапов
     ├── Terminal.jsx      # печатающий терминал
     ├── Stack.jsx         # технологии и цифры
-    ├── Contact.jsx       # бриф + ссылка на VK
+    ├── Contact.jsx       # сообщество: VK и GitHub
     ├── Footer.jsx
     └── Logo · Scramble · Magnetic · Reveal · Cursor   # переиспользуемые эффекты
 ```
@@ -95,8 +143,8 @@ src/
 
 | Что | Где |
 | --- | --- |
-| Ссылка на VK | `src/components/Contact.jsx` → `VK_URL` |
-| Список услуг | `src/components/Services.jsx` |
+| VK, GitHub, репозиторий с проектами, скрытые ветки | `src/config.js` |
+| Направления | `src/components/Services.jsx` |
 | Этапы работы | `src/components/Process.jsx` |
 | Технологии и цифры | `src/components/Stack.jsx` |
 | Цвета, шрифты, отступы | `src/styles.css` → `:root` |

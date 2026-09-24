@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform, useVelocity, useSpring } from 'framer-motion'
 
-const words = ['WEB', 'MOBILE', 'BOTS', 'GAMEDEV', 'BACKEND', 'UI/UX', 'AI', 'DEVOPS', 'SCRIPTS', 'BRANDING']
+const words = ['OPEN SOURCE', 'TOOLS', 'MONITORING', 'MODS', 'BOTS', 'GAMEDEV', 'WEB', 'BACKEND', 'DESIGN', 'COMMUNITY']
 
 function Row({ reverse, speed }) {
   const line = [...words, ...words]

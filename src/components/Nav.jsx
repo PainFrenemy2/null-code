@@ -2,23 +2,19 @@ import { useState } from 'react'
 import { motion, useMotionValueEvent, useScroll } from 'framer-motion'
 import Logo from './Logo.jsx'
 import Scramble from './Scramble.jsx'
+import { goRoute, goSection } from '../router.js'
 
-export const scrollTo = (id) => (e) => {
-  e.preventDefault()
-  const el = document.querySelector(id)
-  if (!el) return
-  if (window.__lenis) window.__lenis.scrollTo(el, { offset: -20 })
-  else el.scrollIntoView({ behavior: 'smooth' })
-}
+// Совместимость со старыми импортами
+export const scrollTo = goSection
 
 const links = [
-  ['#services', 'Услуги'],
-  ['#process', 'Процесс'],
-  ['#stack', 'Стек'],
-  ['#contact', 'Контакты'],
+  { label: 'Проекты', route: '#/projects' },
+  { label: 'Направления', section: '#services' },
+  { label: 'Как мы работаем', section: '#process' },
+  { label: 'Сообщество', section: '#contact' },
 ]
 
-export default function Nav() {
+export default function Nav({ route }) {
   const { scrollY, scrollYProgress } = useScroll()
   const [hidden, setHidden] = useState(false)
   const [open, setOpen] = useState(false)
@@ -32,29 +28,34 @@ export default function Nav() {
     <>
       <motion.div className="progress" style={{ scaleX: scrollYProgress }} />
       <motion.header className="nav" animate={{ y: hidden ? '-120%' : 0 }} transition={{ duration: 0.35, ease: 'easeOut' }}>
-        <a href="#top" className="nav__brand" onClick={scrollTo('#top')}>
+        <a href="#/" className="nav__brand" onClick={goRoute('#/')}>
           <Logo size={34} />
           <span className="mono">
             null<span className="dim">/</span>code
           </span>
         </a>
         <nav className={`nav__links ${open ? 'is-open' : ''}`}>
-          {links.map(([href, label], i) => (
-            <a
-              key={href}
-              href={href}
-              onClick={(e) => {
-                setOpen(false)
-                scrollTo(href)(e)
-              }}
-            >
-              <span className="mono dim">0{i + 1}</span>
-              <Scramble text={label} hover />
-            </a>
-          ))}
+          {links.map((l, i) => {
+            const active = l.route && route === 'projects'
+            return (
+              <a
+                key={l.label}
+                href={l.route || l.section}
+                className={active ? 'is-active' : ''}
+                onClick={(e) => {
+                  setOpen(false)
+                  if (l.route) goRoute(l.route)(e)
+                  else goSection(l.section)(e)
+                }}
+              >
+                <span className="mono dim">0{i + 1}</span>
+                <Scramble text={l.label} hover />
+              </a>
+            )
+          })}
         </nav>
-        <a href="#contact" className="btn btn--small nav__cta" onClick={scrollTo('#contact')}>
-          Обсудить проект
+        <a href="#/projects" className="btn btn--small nav__cta" onClick={goRoute('#/projects')}>
+          Скачать ↓
         </a>
         <button className={`burger ${open ? 'is-open' : ''}`} onClick={() => setOpen(!open)} aria-label="Меню">
           <span />

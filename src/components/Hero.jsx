@@ -4,7 +4,7 @@ import CodeField from './CodeField.jsx'
 import Logo from './Logo.jsx'
 import Scramble from './Scramble.jsx'
 import Magnetic from './Magnetic.jsx'
-import { scrollTo } from './Nav.jsx'
+import { goRoute, goSection } from '../router.js'
 
 const ease = [0.22, 1, 0.36, 1]
 
@@ -46,7 +46,7 @@ export default function Hero({ ready }) {
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.1 }}
         >
-          <span className="pulse" /> студия разработки · открыты к проектам
+          <span className="pulse" /> сообщество разработчиков · open source
         </motion.div>
 
         <h1 className="hero__title">
@@ -57,7 +57,7 @@ export default function Hero({ ready }) {
         <div className="hero__sub">
           <p className="mono">
             <span className="dim">{'// '}</span>
-            <Scramble text="из нуля — в работающий продукт" start={ready} />
+            <Scramble text="из нуля — в работающий код" start={ready} />
           </p>
           <motion.p
             className="hero__lead"
@@ -65,8 +65,8 @@ export default function Hero({ ready }) {
             animate={ready ? { opacity: 1 } : {}}
             transition={{ duration: 1, delay: 1.1 }}
           >
-            Сайты, веб-приложения, боты, мобильные приложения, игры, бэкенд и дизайн. Берём идею, которой ещё нет, и
-            превращаем её в код.
+            Мы не студия и не агентство. Мы сообщество, которое просто делает штуки: программы, утилиты, моды, ботов,
+            игры. Всё выкладываем на GitHub, а вы качаете и пользуетесь.
           </motion.p>
         </div>
 
@@ -77,13 +77,13 @@ export default function Hero({ ready }) {
           transition={{ duration: 0.8, delay: 1.3 }}
         >
           <Magnetic>
-            <a href="#contact" className="btn" onClick={scrollTo('#contact')}>
-              Начать проект <span className="arrow">→</span>
+            <a href="#/projects" className="btn" onClick={goRoute('#/projects')}>
+              Смотреть проекты <span className="arrow">→</span>
             </a>
           </Magnetic>
           <Magnetic>
-            <a href="#services" className="btn btn--ghost" onClick={scrollTo('#services')}>
-              Что мы делаем
+            <a href="#contact" className="btn btn--ghost" onClick={goSection('#contact')}>
+              Вступить в сообщество
             </a>
           </Magnetic>
         </motion.div>

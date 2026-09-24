@@ -11,9 +11,9 @@ export default function Stack() {
   return (
     <section className="section" id="stack">
       <div className="section__head">
-        <div className="label mono">[ 04 ] стек</div>
+        <div className="label mono">[ 05 ] стек</div>
         <Reveal as="h2" className="h2">
-          Инструменты <span className="outline-text">под задачу</span>,<br />а не задача под инструмент
+          Пишем <span className="outline-text">на чём удобно</span>,<br />а не на чём модно
         </Reveal>
       </div>
       <div className="stack">
@@ -34,10 +34,10 @@ export default function Stack() {
       </div>
       <div className="stats">
         {[
-          ['0', 'готовых шаблонов — всё с нуля'],
-          ['∞', 'направлений разработки'],
-          ['24/7', 'на связи в VK'],
-          ['1', 'команда на весь цикл'],
+          ['0 ₽', 'стоит скачать любой проект'],
+          ['∞', 'идей в очереди'],
+          ['100%', 'кода открыто на GitHub'],
+          ['1', 'сообщество'],
         ].map(([n, t], i) => (
           <Reveal key={t} delay={i * 0.1} className="stat">
             <div className="stat__n">{n}</div>

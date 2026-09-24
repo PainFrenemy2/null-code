@@ -4,14 +4,14 @@ import Reveal from './Reveal.jsx'
 import Scramble from './Scramble.jsx'
 
 const services = [
-  { tag: 'web', title: 'Сайты и веб-приложения', text: 'Лендинги, магазины, SPA, личные кабинеты и админки. React, Next.js, Vue.', icon: '</>' },
-  { tag: 'mobile', title: 'Мобильные приложения', text: 'iOS и Android на React Native и Flutter — один код, две платформы.', icon: '[ ]' },
-  { tag: 'bots', title: 'Боты и автоматизация', text: 'Telegram и VK боты, парсеры, интеграции и скрипты, которые экономят часы.', icon: '>_' },
-  { tag: 'backend', title: 'Бэкенд и API', text: 'Node.js, Python, Go. Базы данных, очереди, микросервисы, высокая нагрузка.', icon: '{ }' },
-  { tag: 'gamedev', title: 'Игры', text: 'Браузерные и мобильные игры, Unity, моды и сервера для любимых проектов.', icon: '▲▼' },
-  { tag: 'design', title: 'UI/UX и брендинг', text: 'Интерфейсы, прототипы в Figma, логотипы и айдентика, как у нас самих.', icon: '◐' },
-  { tag: 'ai', title: 'AI-интеграции', text: 'Нейросети в вашем продукте: чат-боты, генерация, анализ данных.', icon: '∞' },
-  { tag: 'devops', title: 'DevOps и поддержка', text: 'Деплой, CI/CD, Docker, серверы, мониторинг. Не бросаем после релиза.', icon: '⟳' },
+  { tag: 'desktop', title: 'Программы и утилиты', text: 'Десктопные приложения под Windows, macOS и Linux: скачал, запустил, пользуешься.', icon: '[_]' },
+  { tag: 'monitoring', title: 'Мониторинг', text: 'Следим за системой, серверами и сервисами. Графики, алерты, всё в одном окне.', icon: '▁▃▆' },
+  { tag: 'mods', title: 'Моды и лаунчеры', text: 'Моды, сборки и лаунчеры для игр и серверов, которые мы сами любим.', icon: '▲▼' },
+  { tag: 'bots', title: 'Боты и автоматизация', text: 'Боты для VK и Telegram, парсеры и скрипты, которые экономят часы.', icon: '>_' },
+  { tag: 'web', title: 'Веб', text: 'Сайты, панели и веб-сервисы. Как этот сайт, например.', icon: '</>' },
+  { tag: 'backend', title: 'Бэкенд и API', text: 'Серверы, базы данных и API, на которых держатся наши проекты.', icon: '{ }' },
+  { tag: 'gamedev', title: 'Игры', text: 'Небольшие игры и эксперименты: от браузерных до движковых.', icon: '◆' },
+  { tag: 'design', title: 'Дизайн', text: 'Интерфейсы, логотипы и айдентика. Всё, чтобы проекты выглядели так же хорошо, как работают.', icon: '◐' },
 ]
 
 function Card({ s, i }) {
@@ -65,12 +65,12 @@ export default function Services() {
   return (
     <section className="section" id="services">
       <div className="section__head">
-        <div className="label mono">[ 01 ] услуги</div>
+        <div className="label mono">[ 01 ] направления</div>
         <Reveal as="h2" className="h2">
-          Делаем <span className="outline-text">всё</span>,<br />что пишется кодом
+          Пишем <span className="outline-text">всё</span>,<br />что интересно
         </Reveal>
         <Reveal className="section__note mono" delay={0.2}>
-          <Scramble text="full-stack · full-cycle · full-power" hover />
+          <Scramble text="open source · бесплатно · для своих" hover />
         </Reveal>
       </div>
       <div className="grid">

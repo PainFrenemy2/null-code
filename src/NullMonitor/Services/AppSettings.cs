@@ -29,6 +29,9 @@ public sealed class AppSettings
 
     public bool HideInFullscreen { get; set; } = true;
 
+    /// <summary>Monitor device name (\\.\DISPLAY2) whose taskbar shows the widget; empty = main taskbar.</summary>
+    public string MonitorDevice { get; set; } = "";
+
     /// <summary>Download and install new releases automatically (installed version only).</summary>
     public bool AutoUpdate { get; set; } = true;
 

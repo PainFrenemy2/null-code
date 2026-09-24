@@ -22,6 +22,7 @@ public partial class TaskbarWidget : Window
     private IntPtr _hwnd;
     private ContextMenu? _menu;
     private bool? _whiteText;
+    private bool _hidden;
     private int _themeTick;
 
     private bool _mouseDown, _dragging;
@@ -216,16 +217,29 @@ public partial class TaskbarWidget : Window
         if (++_themeTick % 10 == 0 && S.Theme == "auto" && IsLightText() != _whiteText)
             BuildLayout();
 
-        var taskbar = Native.FindWindow("Shell_TrayWnd", null);
-        if (taskbar == IntPtr.Zero || !Native.GetWindowRect(taskbar, out var tb) || tb.Width <= 0)
+        var bars = Native.Taskbars();
+        var bar = bars.FirstOrDefault(t => S.MonitorDevice != "" && t.Device == S.MonitorDevice)
+                  ?? bars.FirstOrDefault(t => t.Primary);
+        var taskbar = bar?.Hwnd ?? IntPtr.Zero;
+
+        Native.RECT tb = default;
+        bool hide = taskbar == IntPtr.Zero || !Native.GetWindowRect(taskbar, out tb) || tb.Width <= 0 ||
+                    (S.HideInFullscreen && Native.IsFullscreenAppOn(bar!.Monitor));
+        if (hide)
         {
-            Root.Opacity = 0;
+            // Really hide the window: an invisible topmost window over a game can break its fullscreen mode.
+            if (!_hidden)
+            {
+                Native.ShowWindow(_hwnd, Native.SW_HIDE);
+                _hidden = true;
+            }
             return;
         }
-
-        bool hide = S.HideInFullscreen && Native.IsForegroundFullscreen();
-        Root.Opacity = hide ? 0 : 1;
-        IsHitTestVisible = !hide;
+        if (_hidden)
+        {
+            Native.ShowWindow(_hwnd, Native.SW_SHOWNOACTIVATE);
+            _hidden = false;
+        }
 
         double scale = VisualTreeHelper.GetDpi(this).DpiScaleX;
         bool horizontal = tb.Width >= tb.Height;
@@ -247,8 +261,9 @@ public partial class TaskbarWidget : Window
             }
             else
             {
-                // Fallback when the tray area can't be found: roughly where the tray starts on Windows 11.
-                int trayLeft = tb.Right - (int)(260 * scale);
+                // Fallback when the tray area can't be found: roughly where the tray (main taskbar)
+                // or the clock (extra monitors) starts on Windows 11.
+                int trayLeft = tb.Right - (int)((bar!.Primary ? 260 : 140) * scale);
                 var notify = Native.FindWindowEx(taskbar, IntPtr.Zero, "TrayNotifyWnd", null);
                 if (notify != IntPtr.Zero && Native.GetWindowRect(notify, out var nr) &&
                     nr.Width > 0 && nr.Left > tb.Left && nr.Left <= tb.Right)
@@ -385,6 +400,30 @@ public partial class TaskbarWidget : Window
         pos.Items.Add(reset);
         pos.Items.Add(new MenuItem { Header = "Совет: зажми и тяни мышью", IsEnabled = false });
         menu.Items.Add(pos);
+
+        var bars = Native.Taskbars();
+        var monitors = new MenuItem { Header = "Монитор" };
+        bool anySelected = bars.Any(b => !b.Primary && b.Device == S.MonitorDevice);
+        foreach (var b in bars)
+        {
+            var bar = b;
+            var digits = new string(bar.Device.Where(char.IsDigit).ToArray());
+            var name = $"Монитор {(digits == "" ? "?" : digits)}{(bar.Primary ? " — основной" : "")}  ·  {bar.Screen.Width}×{bar.Screen.Height}";
+            bool selected = bar.Primary ? !anySelected : bar.Device == S.MonitorDevice;
+            monitors.Items.Add(Choice(name, selected, () =>
+            {
+                S.MonitorDevice = bar.Primary ? "" : bar.Device;
+                S.OffsetPx = 0;
+            }));
+        }
+        if (bars.Count < 2)
+        {
+            monitors.Items.Add(new Separator());
+            monitors.Items.Add(new MenuItem { Header = "Второй монитор не видно?", IsEnabled = false });
+            monitors.Items.Add(new MenuItem { Header = "Включи в Windows: Панель задач →", IsEnabled = false });
+            monitors.Items.Add(new MenuItem { Header = "«Показывать на всех дисплеях»", IsEnabled = false });
+        }
+        menu.Items.Add(monitors);
 
         if (_last is { CpuTemp: null } or { CpuTempIsApprox: true })
         {

@@ -20,6 +20,9 @@ public partial class TaskbarWidget : Window
     private readonly Dictionary<string, TextBlock> _values = new();
     private Snapshot? _last;
     private IntPtr _hwnd;
+    private ContextMenu? _menu;
+    private bool? _whiteText;
+    private int _themeTick;
 
     private bool _mouseDown, _dragging;
     private int _dragStartX, _dragStartOffset;
@@ -198,6 +201,7 @@ public partial class TaskbarWidget : Window
     private void ApplyTheme()
     {
         bool white = IsLightText();
+        _whiteText = white;
         _fg = white ? Brushes.White : MainWindow.Hex("#1A1A1A");
         _label = white ? MainWindow.Hex("#B8FFFFFF") : MainWindow.Hex("#A0000000");
     }
@@ -207,6 +211,10 @@ public partial class TaskbarWidget : Window
     private void Reposition()
     {
         if (_hwnd == IntPtr.Zero) return;
+
+        // Follow Windows light/dark switches without a restart (checked every ~5 s).
+        if (++_themeTick % 10 == 0 && S.Theme == "auto" && IsLightText() != _whiteText)
+            BuildLayout();
 
         var taskbar = Native.FindWindow("Shell_TrayWnd", null);
         if (taskbar == IntPtr.Zero || !Native.GetWindowRect(taskbar, out var tb) || tb.Width <= 0)
@@ -256,8 +264,10 @@ public partial class TaskbarWidget : Window
             y = tb.Bottom - h - (int)(120 * scale) + S.OffsetPx;
         }
 
-        Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, x, y, 0, 0,
-            Native.SWP_NOSIZE | Native.SWP_NOACTIVATE | Native.SWP_SHOWWINDOW);
+        // While our menu is open don't jump above it, just keep the position.
+        uint flags = Native.SWP_NOSIZE | Native.SWP_NOACTIVATE | Native.SWP_SHOWWINDOW;
+        if (_menu?.IsOpen == true) flags |= Native.SWP_NOZORDER;
+        Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, x, y, 0, 0, flags);
     }
 
     // ───────────────────────── mouse ─────────────────────────
@@ -428,6 +438,7 @@ public partial class TaskbarWidget : Window
         exit.Click += (_, _) => _app.Quit();
         menu.Items.Add(exit);
 
+        _menu = menu;
         menu.PlacementTarget = this;
         menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
         menu.IsOpen = true;

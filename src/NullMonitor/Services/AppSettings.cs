@@ -29,6 +29,9 @@ public sealed class AppSettings
 
     public bool HideInFullscreen { get; set; } = true;
 
+    /// <summary>Download and install new releases automatically (installed version only).</summary>
+    public bool AutoUpdate { get; set; } = true;
+
     [System.Text.Json.Serialization.JsonIgnore]
     public bool IsFirstRun { get; private set; }
 

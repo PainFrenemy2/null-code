@@ -308,6 +308,20 @@ public partial class TaskbarWidget : Window
     {
         var menu = new ContextMenu();
 
+        if (_app.PendingUpdate is { } upd)
+        {
+            var update = new MenuItem
+            {
+                Header = _app.IsUpdating ? $"Обновляюсь до v{upd.Version}…" : $"⬆  Обновить до v{upd.Version}",
+                FontWeight = FontWeights.SemiBold,
+                Foreground = MainWindow.Hex("#A78BFA"),
+                IsEnabled = !_app.IsUpdating,
+            };
+            update.Click += async (_, _) => await _app.InstallUpdateAsync();
+            menu.Items.Add(update);
+            menu.Items.Add(new Separator());
+        }
+
         var open = new MenuItem { Header = "Открыть панель", FontWeight = FontWeights.SemiBold };
         open.Click += (_, _) => _app.ShowDashboard();
         menu.Items.Add(open);
@@ -385,6 +399,29 @@ public partial class TaskbarWidget : Window
                     "Null Monitor", MessageBoxButton.OK, MessageBoxImage.Warning);
         };
         menu.Items.Add(auto);
+        menu.Items.Add(new Separator());
+
+        var about = new MenuItem { Header = $"О программе · v{Updater.Current}" };
+        var check = new MenuItem { Header = "Проверить обновления", IsEnabled = !_app.IsUpdating };
+        check.Click += async (_, _) => await _app.CheckForUpdatesAsync(automatic: false);
+        about.Items.Add(check);
+        about.Items.Add(Toggle(Updater.IsInstalled ? "Обновляться автоматически" : "Обновляться автоматически (после установки)",
+            S.AutoUpdate, v => S.AutoUpdate = v));
+        about.Items.Add(new Separator());
+        var page = new MenuItem { Header = "Страница на GitHub" };
+        page.Click += (_, _) => Updater.OpenUrl(Updater.RepoUrl);
+        about.Items.Add(page);
+        var releases = new MenuItem { Header = "Все версии и что нового" };
+        releases.Click += (_, _) => Updater.OpenUrl(Updater.RepoUrl + "/releases");
+        about.Items.Add(releases);
+        if (Updater.IsInstalled)
+        {
+            about.Items.Add(new Separator());
+            var uninstall = new MenuItem { Header = "Удалить Null Monitor…" };
+            uninstall.Click += (_, _) => _app.Uninstall();
+            about.Items.Add(uninstall);
+        }
+        menu.Items.Add(about);
         menu.Items.Add(new Separator());
 
         var exit = new MenuItem { Header = "Выход" };

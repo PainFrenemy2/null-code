@@ -14,7 +14,10 @@ public static class Autostart
 {
     private const string TaskName = "NullMonitor";
 
-    /// <summary>Autostart runs a private copy, so the downloaded exe can be deleted or moved.</summary>
+    /// <summary>
+    /// The portable exe autostarts from a private copy, so the downloaded file can be deleted or moved.
+    /// An installed app autostarts from its install folder.
+    /// </summary>
     public static readonly string InstallDir =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NullMonitor");
 
@@ -31,7 +34,11 @@ public static class Autostart
         var exe = Environment.ProcessPath;
         if (string.IsNullOrEmpty(exe)) return false;
 
-        if (!IsRunningInstalledCopy())
+        if (Updater.IsInstalled)
+        {
+            // Installed by the setup: run straight from Program Files.
+        }
+        else if (!IsRunningInstalledCopy())
         {
             try
             {
@@ -103,7 +110,7 @@ public static class Autostart
     public static bool Disable()
     {
         bool ok = Schtasks($"/Delete /TN \"{TaskName}\" /F") == 0;
-        if (ok && !IsRunningInstalledCopy())
+        if (ok && !Updater.IsInstalled && !IsRunningInstalledCopy())
         {
             try { File.Delete(InstalledExe); } catch { /* ignore */ }
         }

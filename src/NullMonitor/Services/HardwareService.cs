@@ -179,8 +179,12 @@ public sealed class HardwareService : IDisposable
         return snap;
     }
 
+    private bool _disposed;
+
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _cts.Cancel();
         try { _loop?.Wait(2000); } catch { /* ignore */ }
         lock (_lock)

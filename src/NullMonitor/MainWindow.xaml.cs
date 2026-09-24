@@ -13,7 +13,7 @@ namespace NullMonitor;
 
 public partial class MainWindow : Window
 {
-    private readonly HardwareService _hw = new();
+    private readonly HardwareService _hw;
     private readonly DispatcherTimer _clock = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly Dictionary<string, DiskRow> _diskRows = new();
     private int _tick;
@@ -24,17 +24,19 @@ public partial class MainWindow : Window
     private static readonly Brush TextBrush = Hex("#EEF0F7");
     private static readonly Brush SubBrush = Hex("#8A91A8");
 
-    public MainWindow()
+    public MainWindow(HardwareService hw)
     {
+        _hw = hw;
         InitializeComponent();
 
         var v = Assembly.GetExecutingAssembly().GetName().Version;
         if (v != null) VersionText.Text = $"v{v.Major}.{v.Minor}.{v.Build}";
         Title = $"Null Monitor {VersionText.Text}";
 
-        _hw.Updated += s => Dispatcher.InvokeAsync(() => Render(s));
-        _hw.Failed += msg => Dispatcher.InvokeAsync(() => SetStatus($"Ошибка датчиков: {msg}", Warm));
-        _hw.Start();
+        Action<Snapshot> onUpdate = s => Dispatcher.InvokeAsync(() => Render(s));
+        Action<string> onFail = msg => Dispatcher.InvokeAsync(() => SetStatus($"Ошибка датчиков: {msg}", Warm));
+        _hw.Updated += onUpdate;
+        _hw.Failed += onFail;
 
         _clock.Tick += (_, _) => UpdateClock();
         _clock.Start();
@@ -45,7 +47,12 @@ public partial class MainWindow : Window
             Root.Margin = WindowState == WindowState.Maximized ? new Thickness(7) : new Thickness(0);
             MaxButton.Content = WindowState == WindowState.Maximized ? "" : "";
         };
-        Closed += (_, _) => _hw.Dispose();
+        Closed += (_, _) =>
+        {
+            _hw.Updated -= onUpdate;
+            _hw.Failed -= onFail;
+            _clock.Stop();
+        };
     }
 
     // ───────────────────────── rendering ─────────────────────────

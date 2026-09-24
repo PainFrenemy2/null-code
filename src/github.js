@@ -70,13 +70,19 @@ async function readmeInfo(repo, branch) {
   }
 }
 
-// Релиз ветки: тег «ветка-v1.0» / «ветка/v1.0» / «ветка@1.0» или релиз, собранный из этой ветки
-function releaseFor(branch, releases) {
+// Релиз ветки (релизы приходят от новых к старым). Подходит, если:
+// тег «ветка-v1.0» / «ветка/v1.0» / «ветка@1.0», релиз создан из ветки по имени
+// или собран из одного из её последних коммитов (так делают CI-сборки с тегами вида v1.0.N)
+function releaseFor(branch, releases, shas) {
   const b = branch.toLowerCase()
   return releases.find((r) => {
     if (r.draft) return false
     const tag = r.tag_name.toLowerCase()
-    return r.target_commitish === branch || [`${b}-`, `${b}/`, `${b}@`, `${b}_`].some((p) => tag.startsWith(p))
+    return (
+      r.target_commitish === branch ||
+      shas.has(r.target_commitish) ||
+      [`${b}-`, `${b}/`, `${b}@`, `${b}_`].some((p) => tag.startsWith(p))
+    )
   })
 }
 
@@ -93,10 +99,12 @@ async function loadBranchProjects() {
 
   return Promise.all(
     list.map(async (b) => {
-      const [info, commit] = await Promise.all([
+      const [info, commits] = await Promise.all([
         readmeInfo(GITHUB_REPO, b.name),
-        getJSON(`${API}/repos/${GITHUB_REPO}/commits/${b.commit.sha}`).catch(() => null),
+        getJSON(`${API}/repos/${GITHUB_REPO}/commits?sha=${encodeURIComponent(b.name)}&per_page=50`).catch(() => null),
       ])
+      const commit = commits?.[0]
+      const shas = new Set((commits || []).map((c) => c.sha).concat(b.commit.sha))
       return {
         kind: 'branch',
         key: `${GITHUB_REPO}#${b.name}`,
@@ -110,7 +118,7 @@ async function loadBranchProjects() {
         lastCommit: commit?.commit?.message?.split('\n')[0],
         branch: b.name,
         zip: `https://github.com/${GITHUB_REPO}/archive/refs/heads/${enc(b.name)}.zip`,
-        release: mapRelease(releaseFor(b.name, releases)),
+        release: mapRelease(releaseFor(b.name, releases, shas)),
       }
     }),
   )

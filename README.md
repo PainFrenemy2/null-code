@@ -58,6 +58,8 @@ gh release create monitoring-v1.0.0 \
   build/monitoring-windows-x64.exe build/monitoring-linux-x64.AppImage build/monitoring-macos.dmg
 ```
 
+Если сборку делает GitHub Actions прямо из ветки проекта, тег может быть любым (например `v1.0.12`). Сайт свяжет релиз с веткой по коммиту, из которого он собран.
+
 Можно и через сайт GitHub: **Releases → Draft a new release**. В поле *Target* выберите ветку проекта, тег назовите `monitoring-v1.0.0` и перетащите файлы.
 
 Чтобы сайт угадал систему, в имени файла должно быть `windows`/`win`/`.exe`, `mac`/`darwin`/`.dmg`, `linux`/`.AppImage`/`.deb` или `.apk`.

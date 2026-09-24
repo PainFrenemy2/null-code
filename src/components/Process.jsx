@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
 const steps = [
@@ -12,8 +12,17 @@ const steps = [
 
 export default function Process() {
   const ref = useRef(null)
+  const track = useRef(null)
+  const [dist, setDist] = useState(0)
   const { scrollYProgress } = useScroll({ target: ref })
-  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-72%'])
+  const x = useTransform(scrollYProgress, [0, 1], [0, -dist])
+
+  useEffect(() => {
+    const measure = () => setDist(Math.max(0, track.current.scrollWidth - window.innerWidth))
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
   const bar = useTransform(scrollYProgress, [0, 1], [0, 1])
 
   return (
@@ -28,7 +37,7 @@ export default function Process() {
             <motion.div style={{ scaleX: bar }} />
           </div>
         </div>
-        <motion.div className="process__track" style={{ x }}>
+        <motion.div className="process__track" ref={track} style={{ x }}>
           {steps.map(([cmd, title, text], i) => (
             <div className="step" key={cmd}>
               <div className="step__num">0{i + 1}</div>

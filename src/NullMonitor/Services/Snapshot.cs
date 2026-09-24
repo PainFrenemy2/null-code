@@ -20,6 +20,8 @@ public sealed class Snapshot
     public string CpuName { get; set; } = "CPU";
     public float? CpuLoad { get; set; }
     public float? CpuTemp { get; set; }
+    /// <summary>CpuTemp comes from the ACPI thermal zone, not the CPU itself.</summary>
+    public bool CpuTempIsApprox { get; set; }
     public float? CpuClock { get; set; }
     public float? CpuPower { get; set; }
     public List<float> CoreLoads { get; } = new();

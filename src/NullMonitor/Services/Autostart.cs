@@ -14,12 +14,40 @@ public static class Autostart
 {
     private const string TaskName = "NullMonitor";
 
+    /// <summary>Autostart runs a private copy, so the downloaded exe can be deleted or moved.</summary>
+    public static readonly string InstallDir =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NullMonitor");
+
+    public static string InstalledExe => Path.Combine(InstallDir, "NullMonitor.exe");
+
+    private static bool IsRunningInstalledCopy() =>
+        string.Equals(Path.GetFullPath(Environment.ProcessPath ?? ""), Path.GetFullPath(InstalledExe),
+            StringComparison.OrdinalIgnoreCase);
+
     public static bool IsEnabled() => Schtasks($"/Query /TN \"{TaskName}\"") == 0;
 
     public static bool Enable()
     {
         var exe = Environment.ProcessPath;
         if (string.IsNullOrEmpty(exe)) return false;
+
+        if (!IsRunningInstalledCopy())
+        {
+            try
+            {
+                Directory.CreateDirectory(InstallDir);
+                File.Copy(exe, InstalledExe, overwrite: true);
+                exe = InstalledExe;
+            }
+            catch
+            {
+                // Copy failed (disk, permissions) — autostart the current file instead.
+            }
+        }
+        else
+        {
+            exe = InstalledExe;
+        }
 
         var user = WindowsIdentity.GetCurrent().Name;
         var xml = $"""
@@ -72,7 +100,15 @@ public static class Autostart
         }
     }
 
-    public static bool Disable() => Schtasks($"/Delete /TN \"{TaskName}\" /F") == 0;
+    public static bool Disable()
+    {
+        bool ok = Schtasks($"/Delete /TN \"{TaskName}\" /F") == 0;
+        if (ok && !IsRunningInstalledCopy())
+        {
+            try { File.Delete(InstalledExe); } catch { /* ignore */ }
+        }
+        return ok;
+    }
 
     private static int Schtasks(string args)
     {

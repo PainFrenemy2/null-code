@@ -64,6 +64,7 @@ public partial class MainWindow : Window
         CpuGauge.Value = s.CpuLoad ?? 0;
         CpuLoadText.Text = Pct(s.CpuLoad);
         SetTemp(CpuTempText, s.CpuTemp);
+        if (s.CpuTempIsApprox) CpuTempText.Text = "≈ " + CpuTempText.Text;
         CpuClockText.Text = s.CpuClock is { } cc ? $"{cc / 1000:0.00} ГГц" : "—";
         CpuPowerText.Text = s.CpuPower is { } cp ? $"{cp:0} Вт" : "—";
         CpuThreadsText.Text = Environment.ProcessorCount.ToString();
@@ -122,8 +123,8 @@ public partial class MainWindow : Window
         BoardName.Text = string.IsNullOrWhiteSpace(s.BoardName) ? Environment.MachineName : s.BoardName;
         RenderFans(s.Fans);
 
-        if (s.CpuTemp is null)
-            SetStatus("Температура CPU недоступна — запустите от администратора и установите драйвер PawnIO (pawnio.eu), затем перезапустите программу", Warm);
+        if (s.CpuTemp is null || s.CpuTempIsApprox)
+            SetStatus("Точная температура CPU недоступна — запустите от администратора и установите драйвер PawnIO (pawnio.eu), затем перезапустите программу", Warm);
         else
             SetStatus($"Всё работает · обновление каждую секунду · {DateTime.Now:HH:mm:ss}", Cool);
     }

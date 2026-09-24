@@ -1,3 +1,4 @@
+using System.Management;
 using LibreHardwareMonitor.Hardware;
 
 namespace NullMonitor.Services;
@@ -74,7 +75,10 @@ public sealed class HardwareService : IDisposable
 
     private static float? Find(IHardware hw, SensorType type, params string[] names)
     {
-        var sensors = AllSensors(hw).Where(s => s.SensorType == type && s.Value.HasValue).ToList();
+        // Without the PawnIO driver temperature sensors exist but report 0 — treat that as "no data".
+        var sensors = AllSensors(hw)
+            .Where(s => s.SensorType == type && s.Value.HasValue && (type != SensorType.Temperature || s.Value > 0))
+            .ToList();
         foreach (var name in names)
         {
             var s = sensors.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -102,6 +106,11 @@ public sealed class HardwareService : IDisposable
                                "CPU Package", "Core (Tctl/Tdie)", "Core (Tdie)", "Core (Tctl)", "Core Max", "Core Average", "CPU Cores")
                            ?? AllSensors(cpu).Where(s => s.SensorType == SensorType.Temperature && s.Value > 0)
                                              .Select(s => s.Value).Max();
+            if (snap.CpuTemp is null)
+            {
+                snap.CpuTemp = AcpiTemperature();
+                snap.CpuTempIsApprox = snap.CpuTemp.HasValue;
+            }
             snap.CpuPower = Find(cpu, SensorType.Power, "CPU Package", "Package");
 
             var clocks = AllSensors(cpu)
@@ -177,6 +186,38 @@ public sealed class HardwareService : IDisposable
         }
 
         return snap;
+    }
+
+    private float? _acpiTemp;
+    private DateTime _acpiReadAt = DateTime.MinValue;
+
+    /// <summary>
+    /// Fallback when the CPU sensors are unavailable: the ACPI thermal zone (motherboard/CPU area).
+    /// Less precise, so it is flagged as approximate. WMI is slow, so it is read at most every 5 s.
+    /// </summary>
+    private float? AcpiTemperature()
+    {
+        if ((DateTime.UtcNow - _acpiReadAt).TotalSeconds < 5) return _acpiTemp;
+        _acpiReadAt = DateTime.UtcNow;
+        _acpiTemp = null;
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(@"root\WMI",
+                "SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature");
+            foreach (var obj in searcher.Get())
+            {
+                using (obj)
+                {
+                    float c = (float)(Convert.ToDouble(obj["CurrentTemperature"]) / 10 - 273.15);
+                    if (c is > 5 and < 125) _acpiTemp = Math.Max(_acpiTemp ?? c, c);
+                }
+            }
+        }
+        catch
+        {
+            // Not supported on this machine.
+        }
+        return _acpiTemp;
     }
 
     private bool _disposed;

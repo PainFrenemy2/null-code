@@ -85,8 +85,8 @@ public partial class TaskbarWidget : Window
         var items = new List<FrameworkElement>();
         if (S.ShowCpuLoad || S.ShowCpuTemp) items.Add(Item("CPU", ("cpu", S.ShowCpuLoad, 4), ("cput", S.ShowCpuTemp, 4)));
         if (S.ShowGpuLoad || S.ShowGpuTemp) items.Add(Item("GPU", ("gpu", S.ShowGpuLoad, 4), ("gput", S.ShowGpuTemp, 4)));
-        if (S.ShowNetDown) items.Add(Item("↓", ("down", true, 9)));
-        if (S.ShowNetUp) items.Add(Item("↑", ("up", true, 9)));
+        if (S.ShowNetDown) items.Add(Item("↓", ("down", true, -8)));
+        if (S.ShowNetUp) items.Add(Item("↑", ("up", true, -8)));
         if (S.ShowRam) items.Add(Item("RAM", ("ram", true, 4)));
 
         if (items.Count == 0)
@@ -122,8 +122,9 @@ public partial class TaskbarWidget : Window
                 Text = "—",
                 FontSize = S.FontSize,
                 Foreground = _fg,
-                MinWidth = chars * S.FontSize * 0.62,
-                TextAlignment = TextAlignment.Right,
+                // Negative width = left-aligned (network speeds sit right next to their arrow).
+                MinWidth = Math.Abs(chars) * S.FontSize * 0.62,
+                TextAlignment = chars < 0 ? TextAlignment.Left : TextAlignment.Right,
                 Margin = new Thickness(sp.Children.Count > 1 ? 6 : 0, 0, 0, 0),
             };
             System.Windows.Documents.Typography.SetNumeralAlignment(tb, FontNumeralAlignment.Tabular);
@@ -139,7 +140,7 @@ public partial class TaskbarWidget : Window
     {
         _last = s;
         Set("cpu", Pct(s.CpuLoad));
-        SetTemp("cput", s.CpuTemp);
+        SetTemp("cput", s.CpuTemp, s.CpuTempIsApprox);
         Set("gpu", Pct(s.GpuLoad));
         SetTemp("gput", s.GpuTemp);
         Set("ram", Pct(s.RamLoad));
@@ -147,7 +148,8 @@ public partial class TaskbarWidget : Window
         Set("up", MainWindow.Rate(s.NetUp));
 
         Root.ToolTip =
-            $"{s.CpuName}\n  нагрузка {Pct(s.CpuLoad)} · {Temp(s.CpuTemp)}\n" +
+            $"{s.CpuName}\n  нагрузка {Pct(s.CpuLoad)} · {Temp(s.CpuTemp)}" +
+            (s.CpuTempIsApprox ? " (примерно, датчик платы)" : "") + "\n" +
             $"{s.GpuName}\n  нагрузка {Pct(s.GpuLoad)} · {Temp(s.GpuTemp)}\n" +
             $"ОЗУ {Pct(s.RamLoad)}" + (s.RamUsed is { } u ? $" · {u:0.0} ГБ" : "") + "\n" +
             $"Сеть ↓ {MainWindow.Rate(s.NetDown)}  ↑ {MainWindow.Rate(s.NetUp)}\n\n" +
@@ -159,10 +161,10 @@ public partial class TaskbarWidget : Window
         if (_values.TryGetValue(key, out var tb)) tb.Text = text;
     }
 
-    private void SetTemp(string key, float? t)
+    private void SetTemp(string key, float? t, bool approx = false)
     {
         if (!_values.TryGetValue(key, out var tb)) return;
-        tb.Text = Temp(t);
+        tb.Text = (approx ? "~" : "") + Temp(t);
         tb.Foreground = S.ColorTemps && t is { } v ? TempBrush(v) : _fg;
     }
 
@@ -359,6 +361,17 @@ public partial class TaskbarWidget : Window
         pos.Items.Add(reset);
         pos.Items.Add(new MenuItem { Header = "Совет: зажми и тяни мышью", IsEnabled = false });
         menu.Items.Add(pos);
+
+        if (_last is { CpuTemp: null } or { CpuTempIsApprox: true })
+        {
+            var pawn = new MenuItem { Header = "Нет точной температуры CPU → установить PawnIO" };
+            pawn.Click += (_, _) =>
+            {
+                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://pawnio.eu") { UseShellExecute = true }); }
+                catch { /* no browser */ }
+            };
+            menu.Items.Add(pawn);
+        }
 
         menu.Items.Add(Toggle("Скрывать в полноэкранных играх", S.HideInFullscreen, v => S.HideInFullscreen = v));
         menu.Items.Add(new Separator());

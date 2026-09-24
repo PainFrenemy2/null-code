@@ -6,14 +6,13 @@
 
 **Красивый мониторинг железа для Windows 11 — температура, нагрузка, память, диски и сеть в одном окне.**
 
-[![Build & Release](https://github.com/PainFrenemy2/null-code/actions/workflows/build.yml/badge.svg)](https://github.com/PainFrenemy2/null-code/actions/workflows/build.yml)
-[![Latest release](https://img.shields.io/github/v/release/PainFrenemy2/null-code?label=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7&color=7C3AED)](https://github.com/PainFrenemy2/null-code/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/PainFrenemy2/null-code/total?label=%D1%81%D0%BA%D0%B0%D1%87%D0%B8%D0%B2%D0%B0%D0%BD%D0%B8%D0%B9&color=22D3EE)](https://github.com/PainFrenemy2/null-code/releases)
+[![Build & Release](https://github.com/PainFrenemy2/null-code/actions/workflows/build.yml/badge.svg?branch=null-monitor)](https://github.com/PainFrenemy2/null-code/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/PainFrenemy2/null-code?filter=null-monitor-*&label=%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F&color=7C3AED)](https://github.com/PainFrenemy2/null-code/releases?q=null-monitor&expanded=true)
 ![Windows 11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows11&logoColor=white)
 ![.NET 8](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/license-MIT-22C55E)](LICENSE)
 
-### [⬇ Скачать установщик](https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonitor-Setup.exe) · [все версии](https://github.com/PainFrenemy2/null-code/releases)
+### [⬇ Скачать](https://github.com/PainFrenemy2/null-code/releases?q=null-monitor&expanded=true) · [установка одной командой](#-установка)
 
 </div>
 
@@ -65,18 +64,20 @@ GPU   8%  45°C    ↑  36 КБ/с
 Открой **PowerShell** (Win+X → «Терминал») и вставь:
 
 ```powershell
-irm https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonitor-Setup.exe -OutFile $env:TEMP\NullMonitor-Setup.exe; & $env:TEMP\NullMonitor-Setup.exe
+irm https://raw.githubusercontent.com/PainFrenemy2/null-code/null-monitor/install.ps1 | iex
 ```
+
+Скрипт ([install.ps1](install.ps1)) находит последний релиз Null Monitor, скачивает установщик и запускает его.
 
 ### Вариант 2 — скачать установщик
 
-[**⬇ NullMonitor-Setup.exe**](https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonitor-Setup.exe) → запустить → «Далее».
+Открой [**релизы Null Monitor**](https://github.com/PainFrenemy2/null-code/releases?q=null-monitor&expanded=true) → в самом верхнем скачай **`NullMonitor-Setup.exe`** → запусти → «Далее».
 
 Если вылезет синее окно SmartScreen — **«Подробнее» → «Выполнить в любом случае»**.
 
 ### Вариант 3 — портативная версия
 
-[**⬇ NullMonitor-Portable.exe**](https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonitor-Portable.exe) — просто запусти, ничего не ставится.
+Там же скачай **`NullMonitor-Portable.exe`** — просто запусти, ничего не ставится.
 
 После запуска смотри на панель задач возле часов 👉 там появятся цифры.
 
@@ -85,7 +86,7 @@ irm https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonit
 
 ## 🔄 Автообновление
 
-Установленная версия раз в несколько часов проверяет [Releases](https://github.com/PainFrenemy2/null-code/releases). Когда выходит новая версия, она **сама скачивается, тихо ставится и перезапускается** — делать ничего не нужно. Выключить: ПКМ → «О программе» → «Обновляться автоматически». Проверить вручную: ПКМ → «О программе» → «Проверить обновления».
+Установленная версия раз в несколько часов проверяет [релизы Null Monitor](https://github.com/PainFrenemy2/null-code/releases?q=null-monitor&expanded=true). Когда выходит новая версия, она **сама скачивается, тихо ставится и перезапускается** — делать ничего не нужно. Выключить: ПКМ → «О программе» → «Обновляться автоматически». Проверить вручную: ПКМ → «О программе» → «Проверить обновления».
 
 Обновления скачивает сама программа, поэтому SmartScreen на них не ругается.
 
@@ -93,7 +94,7 @@ irm https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonit
 
 **Как удалить?** «Параметры» → «Приложения» → «Null Monitor» → «Удалить». Или ПКМ по цифрам → «О программе» → «Удалить Null Monitor…». Удаляется всё: программа, автозапуск и настройки.
 
-**Почему появляется SmartScreen?** Windows показывает его для всех программ без платной цифровой подписи (сертификат стоит от ~$100 в год). Программа безопасна — весь код открыт в этом репозитории и собирается GitHub Actions прямо из исходников. Установка командой из «Варианта 1» и автообновления SmartScreen не вызывают.
+**Почему появляется SmartScreen?** Windows показывает его для всех программ без платной цифровой подписи (сертификат стоит от ~$100 в год). Программа безопасна — весь код открыт в этом репозитории и собирается GitHub Actions прямо из исходников. Установка командой из «Варианта 1» и автообновления SmartScreen не вызывают: предупреждение вешается только на файлы, скачанные браузером.
 
 **Портативная версия: если удалить `.exe`, автозапуск сломается?** Нет. При включении «Запускать вместе с Windows» портативная версия копирует себя в `%LocalAppData%\NullMonitor` и стартует оттуда.
 
@@ -106,15 +107,17 @@ irm https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonit
 1. собирает проект на `windows-latest` через `dotnet publish` в один `.exe` (self-contained, win-x64);
 2. присваивает версию `1.0.<номер сборки>`;
 3. собирает установщик через [Inno Setup](https://jrsoftware.org/isinfo.php) (`installer/NullMonitor.iss`);
-4. сразу публикует **релиз** с тегом `v1.0.N` — установленные программы подхватывают его автообновлением.
+4. при пуше в ветку `null-monitor` сразу публикует **релиз** с тегом `null-monitor-v1.0.N` — установленные программы подхватывают его автообновлением.
+
+> Репозиторий [null-code](https://github.com/PainFrenemy2/null-code) — это сообщество, где **каждая ветка — отдельный проект**. Null Monitor живёт в ветке [`null-monitor`](https://github.com/PainFrenemy2/null-code/tree/null-monitor).
 
 Ничего руками делать не нужно — запушил код, через пару минут новая версия в Releases.
 
 ## 🛠 Собрать самому
 
 ```powershell
-git clone https://github.com/PainFrenemy2/null-code.git
-cd null-code
+git clone -b null-monitor https://github.com/PainFrenemy2/null-code.git null-monitor
+cd null-monitor
 dotnet publish src/NullMonitor/NullMonitor.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
 .\publish\NullMonitor.exe
 ```

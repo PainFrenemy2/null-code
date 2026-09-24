@@ -419,10 +419,10 @@ public partial class TaskbarWidget : Window
             S.AutoUpdate, v => S.AutoUpdate = v));
         about.Items.Add(new Separator());
         var page = new MenuItem { Header = "Страница на GitHub" };
-        page.Click += (_, _) => Updater.OpenUrl(Updater.RepoUrl);
+        page.Click += (_, _) => Updater.OpenUrl(Updater.RepoUrl + "/tree/null-monitor");
         about.Items.Add(page);
         var releases = new MenuItem { Header = "Все версии и что нового" };
-        releases.Click += (_, _) => Updater.OpenUrl(Updater.RepoUrl + "/releases");
+        releases.Click += (_, _) => Updater.OpenUrl(Updater.ReleasesPage);
         about.Items.Add(releases);
         if (Updater.IsInstalled)
         {

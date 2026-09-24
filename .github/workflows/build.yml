@@ -1,9 +1,11 @@
 name: Build & Release
 
+# Every push builds the app. Pushes to the project branch `null-monitor` (and manual runs)
+# also publish a release tagged null-monitor-v1.0.N — the repo hosts one project per branch.
 on:
   push:
     branches: ['**']
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE', 'install.ps1']
   workflow_dispatch:
 
 permissions:
@@ -66,13 +68,14 @@ jobs:
           path: dist/*
 
       - name: Create GitHub release
+        if: github.ref == 'refs/heads/null-monitor' || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.ver.outputs.version }}
+          tag_name: null-monitor-v${{ steps.ver.outputs.version }}
           name: Null Monitor v${{ steps.ver.outputs.version }}
           target_commitish: ${{ github.sha }}
           files: dist/*
-          make_latest: true
+          make_latest: false
           body: |
             ## Null Monitor v${{ steps.ver.outputs.version }}
 
@@ -84,10 +87,12 @@ jobs:
             | **`NullMonitor-Setup.exe`** | ⭐ установщик: ярлыки, автозапуск, **автообновление**, удаление через «Приложения» |
             | `NullMonitor-Portable.exe` | портативная версия без установки |
 
-            **Установка без предупреждения SmartScreen** — вставь в PowerShell:
+            **Установка одной командой (без SmartScreen)** — вставь в PowerShell:
             ```powershell
-            irm https://github.com/PainFrenemy2/null-code/releases/latest/download/NullMonitor-Setup.exe -OutFile $env:TEMP\NullMonitor-Setup.exe; & $env:TEMP\NullMonitor-Setup.exe
+            irm https://raw.githubusercontent.com/PainFrenemy2/null-code/null-monitor/install.ps1 | iex
             ```
+
+            Уже стоит? Обновится само в течение нескольких часов (или ПКМ → «О программе» → «Проверить обновления»).
 
             > Если температура процессора не показывается или со значком «~», установи драйвер [PawnIO](https://pawnio.eu) и перезапусти программу.
 

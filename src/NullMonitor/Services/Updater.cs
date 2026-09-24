@@ -12,7 +12,10 @@ public sealed record UpdateInfo(Version Version, string SetupUrl, string PageUrl
 public static class Updater
 {
     public const string RepoUrl = "https://github.com/PainFrenemy2/null-code";
-    private const string LatestApi = "https://api.github.com/repos/PainFrenemy2/null-code/releases/latest";
+    // The repo hosts several projects (one per branch), so releases are told apart by tag prefix.
+    private const string ReleasesApi = "https://api.github.com/repos/PainFrenemy2/null-code/releases?per_page=50";
+    public const string TagPrefix = "null-monitor-v";
+    public const string ReleasesPage = RepoUrl + "/releases?q=null-monitor&expanded=true";
     private const string SetupAssetName = "NullMonitor-Setup.exe";
 
     private static readonly HttpClient Http = CreateClient();
@@ -59,24 +62,32 @@ public static class Updater
     {
         try
         {
-            using var doc = JsonDocument.Parse(await Http.GetStringAsync(LatestApi));
-            var root = doc.RootElement;
+            using var doc = JsonDocument.Parse(await Http.GetStringAsync(ReleasesApi));
+            UpdateInfo? best = null;
 
-            var tag = root.GetProperty("tag_name").GetString()?.TrimStart('v', 'V');
-            if (tag == null || !Version.TryParse(tag, out var latest)) return null;
-            latest = new Version(latest.Major, latest.Minor, Math.Max(0, latest.Build));
-            if (latest <= Current) return null;
-
-            string? setup = null;
-            foreach (var asset in root.GetProperty("assets").EnumerateArray())
+            foreach (var release in doc.RootElement.EnumerateArray())
             {
-                if (string.Equals(asset.GetProperty("name").GetString(), SetupAssetName, StringComparison.OrdinalIgnoreCase))
-                    setup = asset.GetProperty("browser_download_url").GetString();
-            }
-            if (setup == null) return null;
+                if (release.GetProperty("draft").GetBoolean() || release.GetProperty("prerelease").GetBoolean())
+                    continue;
 
-            var page = root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
-            return new UpdateInfo(latest, setup, page ?? RepoUrl + "/releases/latest");
+                var tag = release.GetProperty("tag_name").GetString() ?? "";
+                if (!tag.StartsWith(TagPrefix, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!Version.TryParse(tag[TagPrefix.Length..], out var v)) continue;
+                v = new Version(v.Major, v.Minor, Math.Max(0, v.Build));
+                if (v <= Current || (best != null && v <= best.Version)) continue;
+
+                string? setup = null;
+                foreach (var asset in release.GetProperty("assets").EnumerateArray())
+                {
+                    if (string.Equals(asset.GetProperty("name").GetString(), SetupAssetName, StringComparison.OrdinalIgnoreCase))
+                        setup = asset.GetProperty("browser_download_url").GetString();
+                }
+                if (setup == null) continue;
+
+                var page = release.TryGetProperty("html_url", out var h) ? h.GetString() : null;
+                best = new UpdateInfo(v, setup, page ?? ReleasesPage);
+            }
+            return best;
         }
         catch
         {

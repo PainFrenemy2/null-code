@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+  <defs>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+    <linearGradient id="gpu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22C55E"/><stop offset="1" stop-color="#A3E635"/></linearGradient>
+    <linearGradient id="ram" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#EC4899"/></linearGradient>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A78BFA" stop-opacity=".45"/><stop offset="1" stop-color="#A78BFA" stop-opacity="0"/></linearGradient>
+    <radialGradient id="glow1"><stop offset="0" stop-color="#7C3AED" stop-opacity=".55"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glow2"><stop offset="0" stop-color="#22D3EE" stop-opacity=".3"/><stop offset="1" stop-color="#22D3EE" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="420" rx="24" fill="#0B0D14"/>
+  <ellipse cx="120" cy="40" rx="420" ry="300" fill="url(#glow1)"/>
+  <ellipse cx="1150" cy="420" rx="420" ry="300" fill="url(#glow2)"/>
+
+  <!-- logo + title -->
+  <rect x="64" y="130" width="88" height="88" rx="22" fill="url(#acc)"/>
+  <polyline points="76,178 94,178 102,156 113,196 121,172 140,172" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="280" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="56" font-weight="700" fill="#EEF0F7">Null Monitor</text>
+  <text x="66" y="320" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="20" fill="#8A91A8">Температуры · нагрузка · память · сеть — для Windows 11</text>
+  <text x="66" y="356" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="16" fill="#5A6178">by painfrenemy</text>
+
+  <!-- mini dashboard -->
+  <g font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+    <rect x="600" y="48" width="260" height="170" rx="16" fill="#131722" stroke="#232A3B"/>
+    <text x="620" y="76" font-size="12" font-weight="600" fill="#8A91A8">ПРОЦЕССОР</text>
+    <circle cx="672" cy="150" r="44" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="10"/>
+    <circle cx="672" cy="150" r="44" fill="none" stroke="url(#acc)" stroke-width="10" stroke-linecap="round" stroke-dasharray="178 277" transform="rotate(-90 672 150)"/>
+    <text x="672" y="158" font-size="22" font-weight="700" fill="#EEF0F7" text-anchor="middle">64%</text>
+    <text x="740" y="130" font-size="11" fill="#8A91A8">Температура</text>
+    <text x="740" y="154" font-size="20" font-weight="600" fill="#FBBF24">67 °C</text>
+    <text x="740" y="182" font-size="11" fill="#8A91A8">Частота</text>
+    <text x="740" y="204" font-size="18" font-weight="600" fill="#EEF0F7">4.62 ГГц</text>
+
+    <rect x="880" y="48" width="260" height="170" rx="16" fill="#131722" stroke="#232A3B"/>
+    <text x="900" y="76" font-size="12" font-weight="600" fill="#8A91A8">ВИДЕОКАРТА</text>
+    <circle cx="952" cy="150" r="44" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="10"/>
+    <circle cx="952" cy="150" r="44" fill="none" stroke="url(#gpu)" stroke-width="10" stroke-linecap="round" stroke-dasharray="240 277" transform="rotate(-90 952 150)"/>
+    <text x="952" y="158" font-size="22" font-weight="700" fill="#EEF0F7" text-anchor="middle">87%</text>
+    <text x="1020" y="130" font-size="11" fill="#8A91A8">Температура</text>
+    <text x="1020" y="154" font-size="20" font-weight="600" fill="#4ADE80">58 °C</text>
+    <text x="1020" y="182" font-size="11" fill="#8A91A8">Мощность</text>
+    <text x="1020" y="204" font-size="18" font-weight="600" fill="#EEF0F7">214 Вт</text>
+
+    <rect x="600" y="234" width="540" height="140" rx="16" fill="#131722" stroke="#232A3B"/>
+    <text x="620" y="262" font-size="12" font-weight="600" fill="#8A91A8">ИСТОРИЯ · 60 С</text>
+    <circle cx="1085" cy="258" r="4" fill="url(#ram)"/>
+    <text x="1095" y="262" font-size="11" fill="#8A91A8">RAM</text>
+    <path d="M620 350 L650 330 L680 336 L710 310 L740 318 L770 296 L800 304 L830 286 L860 300 L890 280 L920 292 L950 272 L980 288 L1010 276 L1040 290 L1070 282 L1120 292 L1120 356 L620 356 Z" fill="url(#fill)"/>
+    <polyline points="620,350 650,330 680,336 710,310 740,318 770,296 800,304 830,286 860,300 890,280 920,292 950,272 980,288 1010,276 1040,290 1070,282 1120,292" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linejoin="round"/>
+    <polyline points="620,340 680,334 740,330 800,322 860,318 920,314 980,316 1040,312 1120,310" fill="none" stroke="#F97316" stroke-width="2" stroke-linejoin="round" opacity=".9"/>
+  </g>
+</svg>

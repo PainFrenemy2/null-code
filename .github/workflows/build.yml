@@ -1,0 +1,79 @@
+name: Build & Release
+
+on:
+  push:
+    branches: ['**']
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      PROJECT: src/NullMonitor/NullMonitor.csproj
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Compute version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = "1.0.${{ github.run_number }}"
+          "version=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $v"
+
+      - name: Publish single-file exe
+        run: >
+          dotnet publish ${{ env.PROJECT }} -c Release -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=none
+          -p:Version=${{ steps.ver.outputs.version }}
+          -o publish
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item publish/NullMonitor.exe "dist/NullMonitor-v$v.exe"
+          Compress-Archive -Path publish/NullMonitor.exe -DestinationPath "dist/NullMonitor-v$v-win-x64.zip"
+          Get-ChildItem dist | Format-Table Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NullMonitor-v${{ steps.ver.outputs.version }}
+          path: dist/*
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Null Monitor v${{ steps.ver.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          files: dist/*
+          make_latest: true
+          body: |
+            ## Null Monitor v${{ steps.ver.outputs.version }}
+
+            Мониторинг ПК для Windows 10/11 — температуры, нагрузка, память, диски, сеть.
+
+            **Скачать:** `NullMonitor-v${{ steps.ver.outputs.version }}.exe` — один файл, установка и .NET не нужны.
+
+            > Программа запрашивает права администратора — без них Windows не отдаёт температуры CPU.
+            > Если температура процессора не показывается, установите драйвер [PawnIO](https://pawnio.eu) и перезапустите.
+
+            Сборка из коммита `${{ github.sha }}` (ветка `${{ github.ref_name }}`).

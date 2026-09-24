@@ -20,9 +20,9 @@ public partial class TaskbarWidget : Window
     private readonly Dictionary<string, TextBlock> _values = new();
     private Snapshot? _last;
     private IntPtr _hwnd;
-    private ContextMenu? _menu;
     private bool? _whiteText;
     private bool _hidden;
+    private readonly TrayLocator _tray = new();
     private int _themeTick;
 
     private bool _mouseDown, _dragging;
@@ -264,10 +264,17 @@ public partial class TaskbarWidget : Window
                 // Fallback when the tray area can't be found: roughly where the tray (main taskbar)
                 // or the clock (extra monitors) starts on Windows 11.
                 int trayLeft = tb.Right - (int)((bar!.Primary ? 260 : 140) * scale);
-                var notify = Native.FindWindowEx(taskbar, IntPtr.Zero, "TrayNotifyWnd", null);
-                if (notify != IntPtr.Zero && Native.GetWindowRect(notify, out var nr) &&
-                    nr.Width > 0 && nr.Left > tb.Left && nr.Left <= tb.Right)
-                    trayLeft = nr.Left;
+                if (_tray.GetLeft(taskbar) is { } uiaLeft)
+                {
+                    trayLeft = uiaLeft;
+                }
+                else
+                {
+                    var notify = Native.FindWindowEx(taskbar, IntPtr.Zero, "TrayNotifyWnd", null);
+                    if (notify != IntPtr.Zero && Native.GetWindowRect(notify, out var nr) &&
+                        nr.Width > 0 && nr.Left > tb.Left + tb.Width / 2 && nr.Left <= tb.Right)
+                        trayLeft = nr.Left;
+                }
                 x = trayLeft - w - (int)(6 * scale);
             }
             x += S.OffsetPx;
@@ -279,10 +286,10 @@ public partial class TaskbarWidget : Window
             y = tb.Bottom - h - (int)(120 * scale) + S.OffsetPx;
         }
 
-        // While our menu is open don't jump above it, just keep the position.
-        uint flags = Native.SWP_NOSIZE | Native.SWP_NOACTIVATE | Native.SWP_SHOWWINDOW;
-        if (_menu?.IsOpen == true) flags |= Native.SWP_NOZORDER;
-        Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, x, y, 0, 0, flags);
+        // Keep re-asserting topmost: clicking the taskbar raises it above us otherwise.
+        // The menu opens above the taskbar, so it isn't covered by the widget.
+        Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, x, y, 0, 0,
+            Native.SWP_NOSIZE | Native.SWP_NOACTIVATE | Native.SWP_SHOWWINDOW);
     }
 
     // ───────────────────────── mouse ─────────────────────────
@@ -477,7 +484,6 @@ public partial class TaskbarWidget : Window
         exit.Click += (_, _) => _app.Quit();
         menu.Items.Add(exit);
 
-        _menu = menu;
         menu.PlacementTarget = this;
         menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
         menu.IsOpen = true;
